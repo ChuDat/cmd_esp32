@@ -242,3 +242,4 @@ uint32_t Cmd::conv(char *str, uint8_t base)
 {
     return strtol(str, NULL, base);
 }
+

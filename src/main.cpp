@@ -4,8 +4,17 @@
 #include "cmdArduino.h"
 #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
  #include <time.h>
+ #include <string.h>
+ #include <sstream>
+ #include <stdint.h>
+ #include <stdlib.h>
+ #include <iostream>
+#include <cstdint>
+using namespace std;
 #endif
 #define FORMAT_LITTLEFS_IF_FAILED true
+
+
 
 void listDir(int argCnt, char **args){
     
@@ -60,7 +69,7 @@ void removeDir(int argCnt, char **args){
 }
 
 void readFile(int argCnt, char **args){
-     const char * path = args[1];
+    const char * path = args[1];
     Serial.printf("Reading file: %s\r\n", path);
 
     File file = LITTLEFS.open(path);
@@ -248,6 +257,169 @@ void testFileIO(int argCnt, char **args){
         Serial.println("- failed to open file for reading");
     }
 }
+/************************************************************************************************************/
+
+char *read_file(char *path){
+    File file = LITTLEFS.open(path);
+    int i = 0;
+    static char buf[512];
+    char *buff=buf ;
+    if(file && !file.isDirectory()){
+        size_t len = file.size();
+        size_t flen = len;
+        while(len){
+            size_t toRead = len;
+            if(toRead > 512){
+                toRead = 512;
+            }
+            file.readBytes(buf, toRead);
+            if ((i++ & 0x001F) == 0x001F){
+              Serial.print(".");
+            }
+            len -= toRead;
+        }
+        file.close();  
+    } else {
+        Serial.println("- failed to open file for reading");
+    }
+    return buff;  
+}
+
+char* substring(char* s, int start ,int end)
+{
+
+    static char* input = NULL;
+    if (s != NULL)
+        input = s;
+
+    char* result = new char[strlen(input) + 1];
+    int i = start;
+    int j = 0 ;
+  
+    for ( ;i != end; i++) {
+        result[j] = input[i];
+        j++;
+    }
+    result[j]='\0';
+    return result;
+}
+string kiemtraloi(string dulieukiemtra){
+    char buffer[1] ;
+    uint8_t check ; 
+    char *kiemtra = (char*)dulieukiemtra.c_str(); //chuyen tu string sang char*
+    check = cmd.conv(kiemtra,check);              //chuyen tu char* sang uint8_t
+    check = check&(uint8_t)255;                   //lay 1 byte cuoi
+    itoa(check,buffer,__DECIMAL_DIG__) ;          //chuyen sang string
+    return buffer ;
+}
+void thongtin_nhaplieu(char *loaidulieu){
+     char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/thongtin_nhaplieu.txt");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<4,") + string(buf) + string(">") ;
+     thongtin = dulieukiemtra + string(",") + kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+     
+        
+ //  Serial.println("$GSHT,1,xx,<4,29N1234>,xxx#");
+}
+void thoigianlamviec(char *loaidulieu){
+     char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/thoigianlamviec.txt");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<24,") + string(buf) + string(">") ;
+     thongtin =  dulieukiemtra + string(",") +  kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+}
+void thoigiandung(char *loaidulieu){
+    char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/thoigiandung.txt");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<") + string(buf) + string(">") ;
+     thongtin = dulieukiemtra + string(",") + kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+}
+
+void thoigianmocua(char *loaidulieu){
+    char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/thoigianmocua");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<") + string(buf) + string(">") ;
+     thongtin = dulieukiemtra + string(",") +  kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+}
+
+void hanhtrinhxe(char *loaidulieu){
+     char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/hanhtrinhxe.txt");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<") + string(buf) + string(">") ;
+     thongtin = dulieukiemtra + string(",") + kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+}
+
+void tocdoxe(char *loaidulieu){
+    char buffer[3];
+     string dulieukiemtra ;
+     string thongtin ;
+     char *buf = read_file("/tocdoxe.txt");
+     size_t len = sizeof(buf);
+     itoa(len,buffer,__DECIMAL_DIG__) ;
+     dulieukiemtra = string("$GSHT,") + string(loaidulieu) + string(",") + string(buffer) + string(",<") + string(buf) + string(">") ;
+     thongtin = dulieukiemtra + string(",") + kiemtraloi(dulieukiemtra) + string("#") ;
+     Serial.println(thongtin.c_str());
+}
+
+void read_serial(int argCnt, char **args){
+     char *serial = args[1];
+     char *sub[4] ;
+     sub[0] = substring(serial,0,2);
+     sub[1] = substring(serial,2,4);
+     sub[2] = substring(serial,4,6);
+     sub[3] = substring(serial,6,8);
+
+    if (!strcmp(sub[0],"01"))
+    {
+      thongtin_nhaplieu(sub[0]);
+    }
+    if (!strcmp(sub[0],"02"))
+    {
+        thoigianlamviec(sub[0]);
+    }
+    if (!strcmp(sub[0],"03"))
+    {
+       thoigiandung(sub[0]);
+    }
+    if (!strcmp(sub[0],"04"))
+    {
+        thoigianmocua(sub[0]);
+    }
+     if (!strcmp(sub[0],"05"))
+    {
+        hanhtrinhxe(sub[0]);
+    }
+     if (!strcmp(sub[0],"06"))
+    {
+        tocdoxe(sub[0]);
+    }
+
+}
+
 
 void setup(){
     cmd.begin(115200);
@@ -266,7 +438,7 @@ void setup(){
     cmd.add("writefile2",writeFile2); // writefile2 path 
     cmd.add("deletefile2",deleteFile2);// deletefile2 path 
     cmd.add("testfileio",testFileIO); // tesstfileio path 
-    
+    cmd.add("READ",read_serial);
     
 	
 	
