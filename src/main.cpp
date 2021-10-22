@@ -5,11 +5,7 @@
 #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
  #include <time.h>
  #include <string.h>
- #include <sstream>
- #include <stdint.h>
  #include <stdlib.h>
- #include <iostream>
-#include <cstdint>
 using namespace std;
 #endif
 #define FORMAT_LITTLEFS_IF_FAILED true
